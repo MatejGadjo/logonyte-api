@@ -9,7 +9,8 @@ const forgotPasswordRouter = require('./routes/forgotPasswordRouter');
 const resetPasswordRouter = require('./routes/resetPasswordRouter');
 const changePasswordRouter = require('./routes/changePasswordRouter');
 const profileRouter = require('./routes/profileRouter');
-
+const supportRouter = require('./routes/supportRouter');
+const donationInfoRouter = require('./routes/donationInfoRouter');
 
 const app = express()
 app.use(express.json())
@@ -23,9 +24,19 @@ app.use('/forgotpassword', forgotPasswordRouter);
 app.use('/resetpassword', resetPasswordRouter);
 app.use('/changepassword', changePasswordRouter);
 app.use('/profile', profileRouter);
+app.use('/support', supportRouter);
+app.use('/donationinfo', donationInfoRouter);
 
 
 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}/`)
 })
+
+
+
+
+
+
+
+
