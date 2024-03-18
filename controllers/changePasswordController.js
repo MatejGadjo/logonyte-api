@@ -3,40 +3,41 @@ const bcrypt = require('bcrypt');
 
 const saltRounds = 10;
 
-const changepassword = (req, res) => {
+const changepassword = async (req, res) => {
   const { oldPassword, newPassword, email } = req.body;
 
-  db.select('email','hash').from('login')
-    .where('email', '=', email)
-    .then(result => {
-      if (result.length === 0) {
-        return res.status(404).json({ message: "User not found" });
-      }
+  try {
+    const result = await db.select('email', 'hash').from('login')
+      .where('email', '=', email);
 
-      const hashMatches = bcrypt.compareSync(oldPassword, result[0].hash);
+    if (result.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
-      if (!hashMatches) {
-        return res.status(401).json({ message: "Old password is incorrect." });
-      }
+    const hashMatches = bcrypt.compareSync(oldPassword, result[0].hash);
 
-      // Hash the new password and update in db
+    if (!hashMatches) {
+      return res.status(401).json({ message: "Old password is incorrect." });
+    }
 
-      const hashedNewPassword = bcrypt.hashSync(newPassword, saltRounds);
-      db('login')
+    const hashedNewPassword = bcrypt.hashSync(newPassword, saltRounds);
+
+    try {
+      await db('login')
         .where('email', '=', email)
-        .update({ hash: hashedNewPassword })
-        .then(() => {
-          res.json({ message: "Password changed successfully." });
-        })
-        .catch(err => {
-          console.error("Error updating password", err);
-          res.status(500).json({ message: "Error updating password " });
-        });
-    })
-    .catch(err => {
-      console.error("Error checking old password", err);
-      res.status(500).json({ message: "Error checking old password." });
-    })
+        .update({ hash: hashedNewPassword });
+      res.json({ message: "Password changed successfully." });
+    }
+    catch (error) {
+      console.error("Error updating password", error);
+      res.status(500).json({ message: "Error updating password " });
+    };
+  }
+  catch (error) {
+    console.error("Error checking old password", error);
+    res.status(500).json({ message: "Error checking old password." });
+  }
+
 };
 
 module.exports = changepassword;
